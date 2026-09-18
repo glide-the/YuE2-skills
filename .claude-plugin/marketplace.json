@@ -9,7 +9,7 @@
     {
       "name": "yue2",
       "source": "./claude-code",
-      "description": "Connect Claude Code to a local YuE2 Runner MCP service for song generation, audio transcription, task tracking, and result retrieval.",
+      "description": "Connect Claude Code to a local YuE2 Runner MCP service with the official YuE2 music assets, helpers, and workflow references for generation, covers, editing, transcription, and evaluation.",
       "homepage": "https://github.com/glide-the/YuE2-skills"
     }
   ]

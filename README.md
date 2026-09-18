@@ -1,6 +1,6 @@
 # YuE2 Skills
 
-Claude Code plugin for the local YuE2 Runner MCP service. It bundles the MCP connection, a reusable YuE2/SheetSage2 skill, and commands for generation, transcription, task inspection, and result retrieval.
+Claude Code plugin for the local YuE2 Runner MCP service. It bundles the MCP connection, a reusable YuE2/SheetSage2 skill, official YuE2 music assets and helpers, and commands for generation, transcription, task inspection, and result retrieval.
 
 ## Install
 
@@ -38,7 +38,7 @@ The plugin connects to `http://127.0.0.1:11000/mcp`. No application token is req
 
 - `claude-code/` — installable `yue2` Claude Code plugin
 - `claude-code/.claude-plugin/plugin.json` — plugin metadata and bundled MCP endpoint
-- `claude-code/skills/yue2-runner/` — automatically discovered operational skill
+- `claude-code/skills/yue2-music/` — automatically discovered skill, Runner contract, and vendored official resources
 - `claude-code/commands/` — namespaced slash commands
 - `.claude-plugin/marketplace.json` — marketplace catalog
 
@@ -47,3 +47,7 @@ The plugin connects to `http://127.0.0.1:11000/mcp`. No application token is req
 ```bash
 claude plugin validate ./claude-code
 ```
+
+## Upstream resources
+
+The skill includes `assets/`, `references/`, and `scripts/` from the official [YuE2 music skill](https://github.com/multimodal-art-projection/YuE/tree/main/skills/yue2-music). They are retained under their upstream Apache-2.0 license. See `claude-code/skills/yue2-music/UPSTREAM.md` for the pinned revision.

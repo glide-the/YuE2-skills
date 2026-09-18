@@ -1,7 +1,7 @@
 {
   "name": "yue2",
   "description": "YuE2 for Claude Code — generate songs, transcribe audio with SheetSage2, inspect task state, and retrieve artifacts through the local Runner MCP service.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "glide-the",
     "url": "https://github.com/glide-the"
