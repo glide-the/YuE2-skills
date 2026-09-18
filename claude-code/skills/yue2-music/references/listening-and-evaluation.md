@@ -1,18 +1,14 @@
 # Listening delivery and reproducible evaluation
 
+This file preserves upstream domain guidance. In this plugin, perform every executable step through Runner tasks; do not run the shown runtime helpers or import model packages on the client.
+
 Finish with audio the user can play and the exact conditions that produced it. A score, a metric or a successful process exit is not an audible result.
 
 ## Keep listening and scoring versions separate
 
 Use `m-a-p/YuE2-Vae` for native listening previews. Use `m-a-p/YuE2-Vae-legacy` when reproducing the supplied benchmark-decoder protocol. Keep full model names, revisions and hashes in the record; the word “legacy” does not establish which decoder a score used.
 
-Generate the acoustic latents once for a given song and decode that same saved `latent.npy` for each requested decoder. A musical or lyric edit requires new generation; changing only the decoder does not. The helper produces a new native result directory for cached decoding:
-
-```bash
-python scripts/run_yue2.py decode --source outputs/jazz \
-  --output outputs/jazz-evaluation \
-  --model "$YUE2_MODEL_DIR" --vae "$YUE2_EVAL_VAE_DIR" --offline
-```
+Generate the acoustic latents once for a given song and decode that same saved `latent.npy` for each requested decoder. A musical or lyric edit requires new generation; changing only the decoder does not. Submit `yue2_task` with `operation: decode` and the ready `source_task_id`. The server produces the new native result with its configured verified model and decoder; client paths and model flags are not accepted.
 
 Use a verified local model matching the source result. For Hub models, pass the verified `--revision` and `--vae-revision` as well. Keep the source untouched. The new result must retain the original request, exact plan/semantic tokens and latents, with the new decoder's identity, configuration and audio hashes. Record the source latent hash and the decode-only operation; do not report decoder runtime as full generation speed.
 
@@ -20,11 +16,7 @@ A bare FLAC plus a custom decoder manifest is useful for listening, but is not s
 
 ## Build the listening comparison
 
-```bash
-python scripts/listen.py outputs/pop outputs/jazz --output outputs/comparison
-```
-
-The helper creates a local HTML listening page with copied audio and exact requests. It does not upload or publish. Use fresh output directories and deliver the generated page alongside direct audio links when the interface supports playback.
+Submit `music_listen_task` with `operation: listen` and 1–8 ready `source_task_ids`. Its server-side Processor creates the HTML page and manifest from immutable native task results. Retrieve `comparison_bundle` for the self-contained ZIP, and use the returned metadata artifacts alongside direct audio links when the interface supports playback.
 
 Include the full songs and useful excerpts for long edits. Start excerpts before the edited passage and include its exit; a few isolated notes hide transition problems. For a vocal rewrite, include enough verse and chorus to assess words and phrasing. For a theme/solo edit, include both complete theme statements and their continuation, not just the opening motive.
 
@@ -73,7 +65,7 @@ metric or fabricate a score. Evaluator GPU requirements are separate from the
 
 ## Prepare public listening artifacts deliberately
 
-The listening helper creates a local bundle. It withholds credential-like
+The listening task creates a downloadable bundle. It withholds credential-like
 metadata and excludes weights and latents, but exact requests, local model
 paths and failure messages can still be present in copied files. Review the
 bundle before sharing it publicly. Share only the intended audio, scores,

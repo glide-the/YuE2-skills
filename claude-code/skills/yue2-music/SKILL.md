@@ -9,6 +9,15 @@ Turn a musical request into a reproducible song and an audible comparison. Use r
 
 All model work goes through the `yue2-runner` MCP server. Do not load YuE2 or SheetSage2 locally merely because the upstream helper scripts are bundled with this skill.
 
+All bundled script capabilities are server tasks. Never execute a bundled script or import a model runtime on the client:
+
+| Runner Task | Server-side implementation |
+| --- | --- |
+| `yue2_task` | `scripts/run_yue2.py` |
+| `sheetsage2_task` | `scripts/transcribe.py` |
+| `music_score_task` | `scripts/abc_tools.py` |
+| `music_listen_task` | `scripts/listen.py` |
+
 ## Choose the workflow
 
 | Request | Workflow |
@@ -60,7 +69,7 @@ Use the supported baseline: one request at a time, BF16-capable NVIDIA GPU with 
 
 Use `YuE2-Vae` for listening and `YuE2-Vae-legacy` only when reproducing the supplied benchmark protocol. Keep decoded files separate. Do not infer their roles from the word “legacy.”
 
-The bundled `scripts/` are the official direct-runtime helpers retained for reproducibility. Do not invoke them in the normal MCP workflow. Use them only when the user explicitly selects direct execution in an environment where the official models and dependencies are installed.
+The bundled `scripts/` are upstream source references retained for provenance and server implementation parity. Never invoke them from this skill, even when they exist on the client. Submit the corresponding Runner task instead.
 
 ## Generate and retain the plan
 
@@ -84,7 +93,7 @@ Read [generation-and-covers.md](references/generation-and-covers.md) for Python 
 1. Call `runner_upload` for the source recording and PUT its bytes to the single-use URL. Preserve the original recording.
 2. Submit `sheetsage2_task` with `operation: transcribe`, the returned `audio_asset_id`, and the requested mode. Select `melody-vocal` for vocal melody only, `melody-full` for the full lead including instrumental passages, or `full` when harmony must be retained.
 3. Poll with `runner_result`, retrieve the raw transcription artifact, and inspect warnings. Correct missed notes, meter, or key before attributing errors to YuE2.
-4. For a melody-conditioned cover, submit a `yue2_task` `score_check` with `action: strip_chords`, referencing the returned score artifact. Select a retained voice explicitly when dropping a part; removing chords alone should preserve melodic voices and rests.
+4. For a melody-conditioned cover, submit a `music_score_task` with `operation: score_check` and `action: strip_chords`, referencing the returned score artifact. Select a retained voice explicitly when dropping a part; removing chords alone should preserve melodic voices and rests.
 5. Submit a new `yue2_task` generation with `cot: melody`, target style and suitable lyrics, and `abc_source` referencing the checked chord-free score artifact.
 
 This supplies a symbolic melody condition; it does not preserve the source singer's identity or waveform. `cot: melody` does not remove chord symbols automatically. To retain original harmony as well, use a full transcription and `cot: full`; call this score-conditioned regeneration with melody and harmony.
@@ -96,7 +105,7 @@ Read [editing-workflows.md](references/editing-workflows.md) and [abc-editing.md
 1. Render and retain a baseline from the full plan. Never overwrite its task artifacts.
 2. Define invariants: exact pitches; pitch plus rhythm; contour only; or bounded melodic adaptation. Specify voices/passages, lyrics, instruments, tempo, meter, and structure.
 3. Retrieve the source ABC from its real artifact name. If delegation is available, give a score-editing agent the raw ABC, prompt, lyrics, requested change, and [edit brief](assets/edit-brief.md). Request a new ABC, revised style/lyrics as needed, and an edit manifest. Give a separate reviewer the before/after artifacts and constraints. Without delegation, perform these stages yourself. Keep model generation sequential per GPU.
-4. Check musical events, not character strings: ties, accidentals, and compressed rests matter. Upload the edited ABC as a new immutable asset. Submit `score_check` with `inspect` and, when comparing, `compare` with both source and edited references. Set `allow_tempo_change` only for an intentional tempo change. Exact comparison should fail for intentional rhythm changes; audit permitted differences instead of relabeling the result “melody preserved.”
+4. Check musical events, not character strings: ties, accidentals, and compressed rests matter. Upload the edited ABC as a new immutable asset. Submit `music_score_task` with `operation: score_check`; use `inspect` and, when comparing, `compare` with both source and edited references. Set `allow_tempo_change` only for an intentional tempo change. Exact comparison should fail for intentional rhythm changes; audit permitted differences instead of relabeling the result “melody preserved.”
 5. Regenerate in a new task with the edited ABC asset in `abc_source`. Keep the edited score explicitly connected. Omitting both inline ABC and `abc_source` generates a fresh plan and discards the edit.
 6. Changing style, lyrics, or ABC requires a new render. Old acoustic latents can be decoded again but cannot implement a musical or lyric edit.
 7. Compare full songs and short passages around the edit. Revise when the requested effect fails; retain each attempt and its actual prompt.
@@ -107,7 +116,7 @@ For lyric translation, adapt syllables, stress, vowels, and breath points. Keep 
 
 Read [listening-and-evaluation.md](references/listening-and-evaluation.md). Return playable audio, full prompt/lyrics, before/after ABC, invariant checks, and requested evaluations. Keep model/decoder identity and failures visible.
 
-Use `runner_result_source` with each exact returned `result_source_name`. Prefer `mode: auto` for small text or ABC artifacts and `mode: link` for audio or other large files. If the user requests a local comparison page after downloading artifacts, the bundled official `scripts/listen.py` can build it without publishing or uploading anything.
+Use `runner_result_source` with each exact returned `result_source_name`. Prefer `mode: auto` for small text or ABC artifacts and `mode: link` for audio or other large files. For a comparison page, submit `music_listen_task` with `operation: listen` and the completed `source_task_ids`, then retrieve its `comparison_bundle` ZIP plus the `comparison` and `comparison_manifest` metadata artifacts when needed. Do not download inputs merely to run `scripts/listen.py` locally.
 
 Distinguish symbolic checks, ASR, listening, and quality scores. Deliver custom edit manifests and before/after comparison reports alongside audio. Do not claim exact note realization, instrument removal, singer identity preservation, or sample-accurate preservation from an ABC check or SongBench score alone.
 

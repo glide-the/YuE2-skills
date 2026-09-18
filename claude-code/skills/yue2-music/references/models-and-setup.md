@@ -1,5 +1,7 @@
 # Models, setup, and the audio-to-score bridge
 
+This file preserves upstream model and deployment details for reasoning and provenance. The Runner host owns all environments and weights; this skill must not run setup commands, helper scripts, model imports, or inference on the client.
+
 This reference targets the public YuE2 inference runtime **0.1.6**, the
 SheetSage2 Transformers interface, and the MERT-v2 Transformers interfaces.
 Download models from the public repositories below and record the actual model

@@ -20,7 +20,7 @@
 }
 ```
 
-Only `yue2_task` and `sheetsage2_task` are available in this deployment. Do not add `_service`, interpreter paths, model paths, output paths, shell commands, or unrelated fields.
+The deployment exposes `yue2_task`, `sheetsage2_task`, `music_score_task`, and `music_listen_task`. Do not add `_service`, interpreter paths, model paths, output paths, shell commands, or unrelated fields. All helper scripts run behind these server tasks; the skill never executes them locally.
 
 ## YuE2 operations
 
@@ -49,7 +49,7 @@ Only `yue2_task` and `sheetsage2_task` are available in this deployment. Do not 
 
 `decode` requires `source_task_id` and does not accept `request`, `abc_source`, or score-check fields.
 
-### Score check
+### Legacy score check
 
 `score_check` requires:
 
@@ -69,6 +69,8 @@ Only `yue2_task` and `sheetsage2_task` are available in this deployment. Do not 
 ```
 
 Actions are `inspect`, `strip_chords`, or `compare`. `compare` also requires `after`. A resource reference contains either `asset_id`, or both `task_id` and `result_source_name`.
+
+The same operation remains accepted on `yue2_task` for compatibility. New workflows must set `parameter.task_name` to `music_score_task`, which has the same `operation` and `check` payload but runs in its independent lightweight Processor.
 
 ## SheetSage2 transcription
 
@@ -94,6 +96,30 @@ Actions are `inspect`, `strip_chords`, or `compare`. `compare` also requires `af
 ```
 
 Transcription modes are `full`, `melody-full`, and `melody-vocal`. `max_seconds` is optional and must be positive.
+
+## Listening comparison
+
+Submit the server-side listening helper only after every source task has a ready result:
+
+```json
+{
+  "parameter": {
+    "task_name": "music_listen_task",
+    "reset": false,
+    "user_multi_task": false
+  },
+  "payload": {
+    "code_input": {
+      "userId": "local",
+      "workflow_id": "comparison-name"
+    },
+    "operation": "listen",
+    "source_task_ids": ["music-source-a", "music-source-b"]
+  }
+}
+```
+
+Provide 1–8 distinct task IDs owned by the same local principal. A ready result exposes `comparison_bundle` (`comparison.zip`) for complete delivery, plus `comparison` (`index.html`) and `comparison_manifest` (`manifest.json`) when publication succeeds.
 
 ## Task results
 

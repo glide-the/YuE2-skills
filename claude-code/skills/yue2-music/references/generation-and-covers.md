@@ -1,5 +1,7 @@
 # Generation, covers and reusable stages
 
+This file preserves upstream runtime semantics. In this plugin, translate those semantics into `yue2_task` or `sheetsage2_task` submissions; never execute the CLI examples, import model packages, or load weights on the client.
+
 Use the `yue2-infer` 0.1.6 interface described here. Follow [models-and-setup.md](models-and-setup.md) for installation and public model snapshots. Record the package version, model revisions and weight hashes with each run. Validate a new installation with fresh outputs before treating it as a reproduced experiment.
 
 ## Choose the conditioning mode
@@ -186,23 +188,17 @@ with YuE2Pipeline.from_pretrained(
 
 This loads the decoder without generating a new song. Accepted latent shapes are `[T,64]` and `[1,64,T]`; the returned array is samples × two channels. Do not put this new audio under the old `SongResult` manifest, whose decoder identity describes the listening version. `decode(..., vae=...)` also exists, but it accepts no separate revision argument; use a verified local snapshot or configure the second pipeline as above.
 
-## CLI equivalents and resume behavior
+## Runner equivalents and resume behavior
 
-Given request JSON containing `id`, `style`, `lyrics` and optionally `seed`:
+Given a request containing `id`, `style`, `lyrics` and optionally `seed`, submit
+`yue2_task`: use `operation: generate` with `cot` `full`, `melody`, or `off`;
+use `operation: plan` for the symbolic stage; and reference an uploaded or
+completed ABC through `abc_source` for edited or cover generation. Use
+`operation: all_modes` only when the user requests all three modes. Model,
+VAE, revision, offline mode, output paths, and batch execution are owned by the
+server configuration and are not client fields.
 
-```bash
-yue2 generate --request requests/original.json --cot full --output outputs/full
-yue2 generate --request requests/original.json --cot melody --output outputs/melody
-yue2 generate --request requests/original.json --cot off --output outputs/off
-yue2 generate --request requests/original.json --stage plan --output outputs/plan
-yue2 generate --request requests/jazz.json --cot full --abc-file edits/jazz.abc --output outputs/edited
-yue2 generate --request requests/cover.json --cot melody --abc-file edits/source_melody.abc --output outputs/cover
-yue2 batch --input requests/all.jsonl --output outputs/batch
-```
-
-Pass `--model` and `--vae` with the verified local snapshots and `--offline` for an offline run. For Hub snapshots, add `--revision` and `--vae-revision`. CLI output is nested under `--output/<request-id>/`. JSON may use `abc_path` relative to the request file; the Python API takes `abc` text. Batch requests require unique IDs and run sequentially.
-
-`--resume` validates and reuses a **completed** matching result, including its hashes; it does not continue interrupted AR/NAR generation. Use a fresh directory after an incomplete run or when any request, model or configuration changes. CLI stages are `plan` and `audio`, not separate semantic/synthesis/decode subcommands.
+An idempotent retry validates and reuses a **completed** matching intent; it does not continue interrupted AR/NAR generation. Reuse the same idempotency key only for the same request. Any request change requires a new key and task. Runner stages are `plan` and full generation, not client-selectable semantic/synthesis subcommands.
 
 ## CFG, defaults and evaluation scope
 

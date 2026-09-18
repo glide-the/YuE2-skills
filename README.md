@@ -1,6 +1,6 @@
 # YuE2 Skills
 
-Claude Code plugin for the local YuE2 Runner MCP service. It bundles the MCP connection, a reusable YuE2/SheetSage2 skill, official YuE2 music assets and helpers, and commands for generation, transcription, task inspection, and result retrieval.
+Claude Code plugin for the local YuE2 Runner MCP service. It bundles the MCP connection, a reusable YuE2/SheetSage2 skill, official YuE2 music assets and reference helpers, and commands for generation, transcription, task inspection, and result retrieval. The plugin is a thin client: every script-backed operation runs as a Runner Task/Processor on the server.
 
 ## Install
 
@@ -33,6 +33,17 @@ The plugin connects to `http://127.0.0.1:11000/mcp`. No application token is req
 | `/yue2:transcribe-audio` | Upload and transcribe audio to ABC notation |
 | `/yue2:task-status` | Read task state and retrieve completed artifacts |
 | `/yue2:help` | Show capabilities and connection requirements |
+
+## Server task mapping
+
+| Runner Task | Server-side helper |
+| --- | --- |
+| `yue2_task` | `run_yue2.py` |
+| `sheetsage2_task` | `transcribe.py` |
+| `music_score_task` | `abc_tools.py` |
+| `music_listen_task` | `listen.py` |
+
+The vendored `scripts/` preserve upstream source and provenance. Claude must not execute them on the client; it uploads inputs, submits one of the tasks above, polls the returned task ID, and retrieves declared artifacts.
 
 ## Repository layout
 

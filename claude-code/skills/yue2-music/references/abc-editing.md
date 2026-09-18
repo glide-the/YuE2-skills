@@ -1,5 +1,7 @@
 # Edit the score while preserving its musical meaning
 
+This file preserves upstream notation guidance. In this plugin, submit every inspect, strip, or compare action as a `music_score_task`; never execute `scripts/abc_tools.py` on the client.
+
 Start from `plan.save(...)`'s `score.abc`, or SheetSage2's exported `score.abc` when covering an audio recording. Keep an untouched source and write a new edited file. Model-generated plans and transcriptions can contain mistakes; inspect them before treating them as a musical reference.
 
 The helper in this skill is an original Python standard-library implementation for a **bounded native ABC dialect**. It checks structure and exact symbolic melody. It does not implement the entire ABC standard, force the generator to follow the score, or measure perceptual harmony.
@@ -56,22 +58,14 @@ Count **sounding notes after merging ties**, not raw ABC note tokens. A chord-on
 
 ## Portable inspection and cover preparation
 
-Run these commands from this skill's directory, or adjust the script path:
-
-```bash
-python scripts/abc_tools.py inspect source.abc --output source-inspection.json
-python scripts/abc_tools.py strip-chords source.abc cover.abc
-python scripts/abc_tools.py compare source.abc cover.abc
-```
+Upload local ABC inputs when necessary, then submit `music_score_task` with
+`operation: score_check`. Set `check.action` to `inspect`, `strip_chords`, or
+`compare`; references use either `asset_id` or a completed task's
+`task_id` plus `result_source_name`.
 
 `strip-chords` validates the input and output, removes only supported quoted chord symbols from music lines, and verifies that all sounding notes, onsets, durations, meters and tempo remain unchanged. Quoted voice names in the header are preserved. It refuses to overwrite an existing output.
 
-The default keeps **both** melodies, including instrumental themes and solos. If the cover should preserve only one part, make that selection explicit:
-
-```bash
-python scripts/abc_tools.py strip-chords source.abc vocal-cover.abc --keep-voice Vocal
-python scripts/abc_tools.py compare source.abc vocal-cover.abc --voices Vocal
-```
+The default keeps **both** melodies, including instrumental themes and solos. If the cover should preserve only one part, set `check.voices` to `Vocal` (or `Ins`) explicitly on the `music_score_task`. Use the same voice selection for a subsequent compare task.
 
 The unselected voice is replaced with rests on the same time grid; the two-voice format remains intact. Choosing `Ins` instead retains the instrumental melody. Do not discard `Ins` merely because a task is called a cover. Supply the resulting chord-free ABC with `cot="melody"`, the target style and the target lyrics; see [generation and covers](generation-and-covers.md).
 
@@ -102,18 +96,7 @@ Examples of targeted repairs depend on context:
 
 These are musical options, not unconditional substitution rules. Recheck the surrounding progression, especially after changing one chord's third or fifth. Do not use a blanket “all melody notes must be chord tones” rule for jazz.
 
-For a strict reharmonization:
-
-```bash
-python scripts/abc_tools.py inspect edited.abc --output edited-inspection.json
-python scripts/abc_tools.py compare source.abc edited.abc --output melody-invariants.json
-```
-
-By default, `compare` requires the same quarter-note tempo. To permit an intentional tempo change while keeping pitches, relative note timing and bar meters:
-
-```bash
-python scripts/abc_tools.py compare source.abc edited.abc --allow-tempo-change
-```
+For a strict reharmonization, submit one inspect task for the edited ABC and one compare task with source and edited references. By default, `compare` requires the same quarter-note tempo. To permit an intentional tempo change while keeping pitches, relative note timing and bar meters, set `check.allow_tempo_change` to `true`.
 
 If melodic or metrical adaptation is authorized, a comparison failure can be expected. Record the precise changed passages and assess the still-fixed parts separately. This helper does not infer that a change is musically good or automatically waive differences. For a quoted theme, verify the complete intended phrase sequence and repetitions; a repeated opening motive is not the complete theme.
 
