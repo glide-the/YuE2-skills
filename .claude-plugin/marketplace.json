@@ -1,0 +1,16 @@
+{
+  "name": "yue2-skills",
+  "description": "YuE2 music generation and SheetSage2 transcription skills for Claude Code.",
+  "owner": {
+    "name": "glide-the",
+    "url": "https://github.com/glide-the"
+  },
+  "plugins": [
+    {
+      "name": "yue2",
+      "source": "./claude-code",
+      "description": "Connect Claude Code to a local YuE2 Runner MCP service for song generation, audio transcription, task tracking, and result retrieval.",
+      "homepage": "https://github.com/glide-the/YuE2-skills"
+    }
+  ]
+}
