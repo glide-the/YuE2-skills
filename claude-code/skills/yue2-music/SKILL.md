@@ -7,16 +7,16 @@ description: Generate, cover, transcribe, and edit songs with YuE2 and SheetSage
 
 Turn a musical request into a reproducible song and an audible comparison. Use released model interfaces. Retain an original song and its plan before making changes.
 
-All model work goes through the `yue2-runner` MCP server. Do not load YuE2 or SheetSage2 locally merely because the upstream helper scripts are bundled with this skill.
+All model and music-processing work goes through the `yue2-runner` MCP server. This skill contains no executable model or music-processing helpers.
 
-All bundled script capabilities are server tasks. Never execute a bundled script or import a model runtime on the client:
+Use the matching server task. Never import a model runtime or recreate these operations on the client:
 
-| Runner Task | Server-side implementation |
+| Runner Task | Capability |
 | --- | --- |
-| `yue2_task` | `scripts/run_yue2.py` |
-| `sheetsage2_task` | `scripts/transcribe.py` |
-| `music_score_task` | `scripts/abc_tools.py` |
-| `music_listen_task` | `scripts/listen.py` |
+| `yue2_task` | Generate, plan, compare modes, and decode |
+| `sheetsage2_task` | Transcribe uploaded audio to score artifacts |
+| `music_score_task` | Inspect, strip chords, and compare ABC |
+| `music_listen_task` | Build a self-contained listening bundle |
 
 ## Choose the workflow
 
@@ -69,7 +69,7 @@ Use the supported baseline: one request at a time, BF16-capable NVIDIA GPU with 
 
 Use `YuE2-Vae` for listening and `YuE2-Vae-legacy` only when reproducing the supplied benchmark protocol. Keep decoded files separate. Do not infer their roles from the word “legacy.”
 
-The bundled `scripts/` are upstream source references retained for provenance and server implementation parity. Never invoke them from this skill, even when they exist on the client. Submit the corresponding Runner task instead.
+Executable helpers belong to the Runner host and are deliberately absent from this plugin. Submit the corresponding Runner task instead of implementing or invoking a local equivalent.
 
 ## Generate and retain the plan
 
@@ -116,8 +116,8 @@ For lyric translation, adapt syllables, stress, vowels, and breath points. Keep 
 
 Read [listening-and-evaluation.md](references/listening-and-evaluation.md). Return playable audio, full prompt/lyrics, before/after ABC, invariant checks, and requested evaluations. Keep model/decoder identity and failures visible.
 
-Use `runner_result_source` with each exact returned `result_source_name`. Prefer `mode: auto` for small text or ABC artifacts and `mode: link` for audio or other large files. For a comparison page, submit `music_listen_task` with `operation: listen` and the completed `source_task_ids`, then retrieve its `comparison_bundle` ZIP plus the `comparison` and `comparison_manifest` metadata artifacts when needed. Do not download inputs merely to run `scripts/listen.py` locally.
+Use `runner_result_source` with each exact returned `result_source_name`. Prefer `mode: auto` for small text or ABC artifacts and `mode: link` for audio or other large files. For a comparison page, submit `music_listen_task` with `operation: listen` and the completed `source_task_ids`, then retrieve its `comparison_bundle` ZIP plus the `comparison` and `comparison_manifest` metadata artifacts when needed.
 
 Distinguish symbolic checks, ASR, listening, and quality scores. Deliver custom edit manifests and before/after comparison reports alongside audio. Do not claim exact note realization, instrument removal, singer identity preservation, or sample-accurate preservation from an ABC check or SongBench score alone.
 
-The upstream helpers, assets, and domain references retain their Apache-2.0 license in [LICENSE](LICENSE). Provenance and the pinned revision are recorded in [UPSTREAM.md](UPSTREAM.md).
+The upstream assets and adapted domain references retain their Apache-2.0 license in [LICENSE](LICENSE). Provenance and the pinned revision are recorded in [UPSTREAM.md](UPSTREAM.md).

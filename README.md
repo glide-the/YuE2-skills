@@ -1,6 +1,6 @@
 # YuE2 Skills
 
-Claude Code plugin for the local YuE2 Runner MCP service. It bundles the MCP connection, a reusable YuE2/SheetSage2 skill, official YuE2 music assets and reference helpers, and commands for generation, transcription, task inspection, and result retrieval. The plugin is a thin client: every script-backed operation runs as a Runner Task/Processor on the server.
+Claude Code plugin for the local YuE2 Runner MCP service. It bundles the MCP connection, a reusable YuE2/SheetSage2 skill, official YuE2 music assets and adapted domain references, and commands for generation, transcription, task inspection, and result retrieval. The plugin is a pure client: every operation runs as a Runner Task/Processor on the server.
 
 ## Install
 
@@ -36,14 +36,14 @@ The plugin connects to `http://127.0.0.1:11000/mcp`. No application token is req
 
 ## Server task mapping
 
-| Runner Task | Server-side helper |
+| Runner Task | Server-side capability |
 | --- | --- |
-| `yue2_task` | `run_yue2.py` |
-| `sheetsage2_task` | `transcribe.py` |
-| `music_score_task` | `abc_tools.py` |
-| `music_listen_task` | `listen.py` |
+| `yue2_task` | Generate, plan, compare modes, or decode |
+| `sheetsage2_task` | Transcribe uploaded audio |
+| `music_score_task` | Inspect, strip chords, or compare ABC |
+| `music_listen_task` | Build a downloadable listening bundle |
 
-The vendored `scripts/` preserve upstream source and provenance. Claude must not execute them on the client; it uploads inputs, submits one of the tasks above, polls the returned task ID, and retrieves declared artifacts.
+The plugin intentionally contains no `scripts/` directory. Claude uploads inputs, submits one of the tasks above, polls the returned task ID, and retrieves declared artifacts. Executable helpers live only in the Runner deployment.
 
 ## Repository layout
 
@@ -61,4 +61,4 @@ claude plugin validate ./claude-code
 
 ## Upstream resources
 
-The skill includes `assets/`, `references/`, and `scripts/` from the official [YuE2 music skill](https://github.com/multimodal-art-projection/YuE/tree/main/skills/yue2-music). They are retained under their upstream Apache-2.0 license. See `claude-code/skills/yue2-music/UPSTREAM.md` for the pinned revision.
+The skill includes official `assets/` and adapted `references/` from the [YuE2 music skill](https://github.com/multimodal-art-projection/YuE/tree/main/skills/yue2-music). They remain under the upstream Apache-2.0 license. See `claude-code/skills/yue2-music/UPSTREAM.md` for the pinned revision and adaptation boundary.

@@ -20,7 +20,7 @@
 }
 ```
 
-The deployment exposes `yue2_task`, `sheetsage2_task`, `music_score_task`, and `music_listen_task`. Do not add `_service`, interpreter paths, model paths, output paths, shell commands, or unrelated fields. All helper scripts run behind these server tasks; the skill never executes them locally.
+The deployment exposes `yue2_task`, `sheetsage2_task`, `music_score_task`, and `music_listen_task`. Do not add `_service`, interpreter paths, model paths, output paths, shell commands, or unrelated fields. All processing runs behind these server tasks; the client plugin contains no executable processing helpers.
 
 ## YuE2 operations
 

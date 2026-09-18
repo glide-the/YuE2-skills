@@ -1,6 +1,6 @@
 # Edit the score while preserving its musical meaning
 
-This file preserves upstream notation guidance. In this plugin, submit every inspect, strip, or compare action as a `music_score_task`; never execute `scripts/abc_tools.py` on the client.
+This file preserves upstream notation guidance. In this plugin, submit every inspect, strip, or compare action as a `music_score_task`; no local score-processing helper is included.
 
 Start from `plan.save(...)`'s `score.abc`, or SheetSage2's exported `score.abc` when covering an audio recording. Keep an untouched source and write a new edited file. Model-generated plans and transcriptions can contain mistakes; inspect them before treating them as a musical reference.
 

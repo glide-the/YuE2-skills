@@ -148,7 +148,7 @@ nonzero. Do not treat saved annotations alone as a successful cover score.
 ```
 
 Review this ABC, then pass it to YuE2 with `cot="melody"` and the target style and
-lyrics. The skill's `scripts/transcribe.py --task melody-full` enables
+lyrics. The `sheetsage2_task` transcription mode `melody-full` enables
 `melody_only=True` too; `--task melody-vocal` additionally selects only the vocal
 melody task. Its `input.json` records the export flag and task prompts. These
 two helper modes omit chord prediction tasks, so raw chord predictions are not
